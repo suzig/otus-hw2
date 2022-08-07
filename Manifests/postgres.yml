@@ -1,0 +1,68 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  type: NodePort
+  ports:
+   - port: 5433
+  selector:
+    app: postgres
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-statefulset
+spec:
+  serviceName: "postgres"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres/postgres:latest
+        ports:
+        - containerPort: 5432
+          name: postgredb
+        env:
+          - name: SECRET_DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgres-envs
+                key: DB_USER
+                optional: false
+          - name: SECRET_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-envs
+                key: DB_PASSWORD
+                optional: false
+          - name: SECRET_DB_INST
+            valueFrom:
+              secretKeyRef:
+                name: postgres-envs
+                key: DB_INST
+                optional: false
+        volumeMounts:
+        - name: postgredb
+          mountPath: /var/lib/postgresql/data
+          subPath: postgres
+  volumeClaimTemplates:
+  - metadata:
+      name: postgredb
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: localstorage
+      resources:
+        requests:
+          storage: 1Gi

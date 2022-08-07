@@ -1,0 +1,32 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: test-cronjob
+  namespace: testing
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 600
+      template:
+        metadata:
+          name: test-job
+          labels:
+            app: test-job
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: insert
+            env:
+              - name: DATABASE_URI
+                value: postgres
+            image: postgres:latest
+            command:
+              - sh
+              - "-c"
+              - |
+                PGPASSWORD=passwd psql -d myapp -U myuser -h $DATABASE_URI  <<'EOF'
+                  INSERT INTO client(id,name) 
+                  VALUES(DEFAULT,'John');
+                EOF
+      backoffLimit: 0 #number of retries before considering a Job as failed

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otus-hw2-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: otus-hw2-app
+  template:
+    metadata:
+      labels:
+        app: otus-hw2-app
+    spec:
+      containers:
+        - name: otus-hw2
+          image: ribragimovalfa/otus-hw2:otus-hw2
+          ports:
+            - name: web
+              containerPort: 5000
+#          livenessProbe:
+#            httpGet:
+#              port: 5000
+#              path: /get_users
+#            initialDelaySeconds: 5
+#            periodSeconds: 2
+#            timeoutSeconds: 1
+#          readinessProbe:
+#            httpGet:
+#              port: 5000
+#              path: /get_users
+#            initialDelaySeconds: 2
+#            periodSeconds: 2

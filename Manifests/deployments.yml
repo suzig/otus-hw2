@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otus-hw2-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: otus-hw2-app
+  template:
+    metadata:
+      labels:
+        app: otus-hw2-app
+    spec:
+      containers:
+        - name: otus-hw2
+          image: ribragimovalfa/otus-hw2:latest
+          volumeMounts:
+            - name: settings
+              mountPath: "/app/settings/__init__.py"
+              readOnly: true
+          ports:
+            - name: web
+              containerPort: 5000
+          env:
+            - name: SECRET_DB_TYPE
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-envs
+                  key: DB_TYPE
+                  optional: false
+            - name: SECRET_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-envs
+                  key: DB_USER
+                  optional: false
+            - name: SECRET_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-envs
+                  key: DB_PASSWORD
+                  optional: false
+            - name: SECRET_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-envs
+                  key: DB_HOST
+                  optional: false
+            - name: SECRET_DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-envs
+                  key: DB_PORT
+                  optional: false
+            - name: SECRET_DB_INST
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-envs
+                  key: DB_INST
+                  optional: false
+      volumes:
+        - name: settings
+          configMap:
+            name: app-conf
+#          livenessProbe:
+#            httpGet:
+#              port: 5000
+#              path: /get_users
+#            initialDelaySeconds: 5
+#            periodSeconds: 2
+#            timeoutSeconds: 1
+#          readinessProbe:
+#            httpGet:
+#              port: 5000
+#              path: /get_users
+#            initialDelaySeconds: 2
+#            periodSeconds: 2
